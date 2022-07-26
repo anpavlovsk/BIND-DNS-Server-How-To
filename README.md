@@ -45,6 +45,46 @@ sudo systemctl status named
 
 Now you should see the BIND named service is enabled with the status as active (running). At this point, the BIND service will run automatically at system startup/boot. 
 
+### Configuring BIND DNS Server 
+
+You’ve now installed BIND packages on the Ubuntu server, so it’s time to set up the BIND installation on your Ubuntu server. How? By editing BIND and the named service’s configurations. 
+
+All configuration for BIND is available at the /etc/bind/ directory, and configurations for the named service at /etc/default/named. 
+
+1. Edit the /etc/default/named configuration using your preferred editor and add option -4 on the OPTIONS line, as shown below. This option will run the named service on IPv4 only. 
+````
+OPTIONS="-4 -u bind"
+````
+
+Save the changes you made and close the file. 
+
+2. Next, edit the /etc/bind/named.conf.options file and populate the following configuration below the directory "/var/cache/bind"; line. 
+
+This configuration sets the BIND service to run on default UDP port 53 on the server’s localhost and public IP address (172.16.1.10). At the same time, it allows queries from any host to the BIND DNS server using the Cloudflare DNS 1.1.1.1 as the forwarder. 
+````
+    // listen port and address
+    listen-on port 53 { localhost; 172.16.1.10; };
+
+    // for public DNS server - allow from any
+    allow-query { any; };
+
+    // define the forwarder for DNS queries
+    forwarders { 1.1.1.1; };
+
+    // enable recursion that provides recursive query
+    recursion yes;
+````
+
+At the bottom, comment out the listen-on-v6 { any; }; line, to disable the named service from running on IPv6. 
+
+3. Lastly, run the following command to verify the BIND configuration. 
+````
+sudo named-checkconf
+````
+
+If there’s no output, the BIND configurations are correct without any error. 
+
+
 
 
 Bind 9 service is managed by systemd. We can start the Bind DNS service and enable it to start at system reboot using the following command:
