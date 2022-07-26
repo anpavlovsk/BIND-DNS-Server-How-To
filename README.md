@@ -21,10 +21,19 @@ To get started with BIND DNS, you’ll first need to install the BIND packages o
 1. Open your terminal and log in to your server.
 
 2. Next, run the apt update command below to update and refresh the repository package index. This command ensures that you are installing the latest version of packages.
-
 ```
 sudo apt update
 ```
+
+3. Once updated, run the below apt install command to install BIND packages for the Ubuntu server. 
+
+The bind9-utils and bind9-dnsutils packages provide additional command-line tools for BIND. These packages are useful for testing and managing the BIND DNS server. 
+````
+sudo apt install bind9 bind9-utils bind9-dnsutils -y
+````
+
+
+
 Bind 9 service is managed by systemd. We can start the Bind DNS service and enable it to start at system reboot using the following command:
 ````
 systemctl start named
