@@ -12,7 +12,7 @@ This tutorial will be a hands-on demonstration. To follow along, ensure you have
 
 * A Linux server – This example uses the Ubuntu 20.04 server. 
 * A non-root user with root privileges or root/administrator user. 
-* A domain name pointed to the server IP address – This demo uses the atadomain.io domain and server IP address 192.168.33.10. 
+* A domain name pointed to the server IP address – This demo uses the anpavlovsk.com domain and server IP address 192.168.33.10. 
 
 ### Installing BIND Packages
 
@@ -111,20 +111,20 @@ root@ubuntu2004:/#
 
 At this point, you’ve configured the basic configuration of the BIND DNS Server. You’re ready to create a DNS Server with your domain and add other sub-domains for your applications. You’ll need to define and create a new DNS zones configuration to do so. 
 
-In this tutorial, you’ll create a new Name Server (ns1.atadomain.io) and sub-domains (www.atadomain.io, mail.atadomain.io, vault.atadomain.io). 
+In this tutorial, you’ll create a new Name Server (ns1.anpavlovsk.com) and sub-domains (www.anpavlovsk.com, mail.anpavlovsk.com, vault.anpavlovsk.com). 
 
 1. Edit the /etc/bind/named.conf.local file using your preferred editor and add the following configuration. 
 
-This configuration defines the forward zone (/etc/bind/zones/forward.atadomain.io), and the reverse zone (/etc/bind/zones/reverse.atadomain.io) for the atadomain.io domain name. 
+This configuration defines the forward zone (/etc/bind/zones/forward.anpavlovsk.com), and the reverse zone (/etc/bind/zones/reverse.anpavlovsk.com) for the anpavlovsk.com domain name. 
 ```
-zone "atadomain.io" {
+zone "anpavlovsk.com" {
     type master;
-    file "/etc/bind/zones/forward.atadomain.io";
+    file "/etc/bind/zones/forward.anpavlovsk.com";
 };
 
 zone "33.168.192.in-addr.arpa" {
     type master;
-    file "/etc/bind/zones/reverse.atadomain.io";
+    file "/etc/bind/zones/reverse.anpavlovsk.com";
 };
 ````
 
@@ -138,38 +138,38 @@ mkdir -p /etc/bind/zones/
 3. Run each command below to copy the default forward and reverse zones configuration to the /etc/bind/zones directory. 
 ```
 # Copy default forward zone
-sudo cp /etc/bind/db.local /etc/bind/zones/forward.atadomain.io
+sudo cp /etc/bind/db.local /etc/bind/zones/forward.anpavlovsk.com
 
 # Copy default reverse zone
-sudo cp /etc/bind/db.127 /etc/bind/zones/reverse.atadomain.io
+sudo cp /etc/bind/db.127 /etc/bind/zones/reverse.anpavlovsk.com
 
 # List contents of the /etc/bind/zones/ directory
 ls /etc/bind/zones/
 ````
 
-4. Now, edit the forward zone configuration (/etc/bind/zones/forward.atadomain.io) using your preferred editor and populate the configuration below. 
+4. Now, edit the forward zone configuration (/etc/bind/zones/forward.anpavlovsk.com) using your preferred editor and populate the configuration below. 
 
 The forward zone configuration is where you define your domain name and the server IP address. This configuration will translate the domain name to the correct IP address of the server. 
 
 The configuration below creates the following name server and sub-domains: 
 
-* ns1.atadomain.io – The main Name Server for your domain with the IP address 192.168.33.10. 
-* MX record for the atadomain.io domain that is handled by the mail.atadomain.io. The MX record is used for the mail server. 
-* Sub-domains for applications: www.atadomain.io, mail.atadomain.io, and vault.atadomain.io. 
+* ns1.anpavlovsk.com – The main Name Server for your domain with the IP address 192.168.33.10. 
+* MX record for the anpavlovsk.com domain that is handled by the mail.anpavlovsk.com. The MX record is used for the mail server. 
+* Sub-domains for applications: www.anpavlovsk.com, mail.anpavlovsk.com, and vault.anpavlovsk.com. 
 ````
 ;
 ; BIND data file for the local loopback interface
 ;
 $TTL    604800
-@       IN      SOA     atadomain.io. root.atadomain.io. (
+@       IN      SOA     anpavlovsk.com. root.anpavlovsk.com. (
                             2         ; Serial
                         604800         ; Refresh
                         86400         ; Retry
                         2419200         ; Expire
                         604800 )       ; Negative Cache TTL
 
-; Define the default name server to ns1.atadomain.io
-@       IN      NS      ns1.atadomain.io.
+; Define the default name server to ns1.anpavlovsk.com
+@       IN      NS      ns1.anpavlovsk.com.
 
 ; Resolve ns1 to server IP address
 ; A record for the main DNS
@@ -177,10 +177,10 @@ ns1     IN      A       192.168.33.10
 
 
 ; Define MX record for mail
-atadomain.io. IN   MX   10   mail.atadomain.io.
+anpavlovsk.com. IN   MX   10   mail.anpavlovsk.com.
 
 
-; Other domains for atadomain.io
+; Other domains for anpavlovsk.com
 ; Create subdomain www - mail - vault
 www     IN      A       192.168.33.10
 mail    IN      A       192.168.33.20
@@ -189,7 +189,7 @@ vault   IN      A       192.168.33.50
 
 Save the changes and close the file. 
 
-5. Like the forward zone, edit the reverse zone configuration file (/etc/bind/zones/reverse.atadomain.io) and populate the following configuration. 
+5. Like the forward zone, edit the reverse zone configuration file (/etc/bind/zones/reverse.anpavlovsk.com) and populate the following configuration. 
 
 The reverse zone translates the server IP address to the domain name. The reverse zone or PTR record is essential for services like the Mail server, which affects the Mail server’s reputation. 
 
@@ -197,33 +197,33 @@ The PTR record uses the last block of the IP address, like the PTR record with t
 
 This configuration creates the reverse zone or PTR record for the following domains: 
 
-* Name server ns1.atadomain.io with the reverse zone or PTR record 192.168.33.10. 
-* PTR record for the domain mail.atadomain.io to the server IP address 192.168.33.10. 
+* Name server ns1.anpavlovsk.com with the reverse zone or PTR record 192.168.33.10. 
+* PTR record for the domain mail.anpavlovsk.com to the server IP address 192.168.33.10. 
 ````
 ;
 ; BIND reverse data file for the local loopback interface
 ;
 $TTL    604800
-@       IN      SOA     atadomain.io. root.atadomain.io. (
+@       IN      SOA     anpavlovsk.com. root.anpavlovsk.com. (
                             1         ; Serial
                         604800         ; Refresh
                         86400         ; Retry
                         2419200         ; Expire
                         604800 )       ; Negative Cache TTL
 
-; Name Server Info for ns1.atadomain.io
-@       IN      NS      ns1.atadomain.io.
+; Name Server Info for ns1.anpavlovsk.com
+@       IN      NS      ns1.anpavlovsk.com.
 NS1     IN      A       192.168.33.10
 
 
-; Reverse DNS or PTR Record for ns1.atadomain.io
+; Reverse DNS or PTR Record for ns1.anpavlovsk.com
 ; Using the last number of DNS Server IP address: 192.168.33.10
-10      IN      PTR     ns1.atadomain.io.
+10      IN      PTR     ns1.anpavlovsk.com.
 
 
-; Reverse DNS or PTR Record for mail.atadomain.io
+; Reverse DNS or PTR Record for mail.anpavlovsk.com
 ; Using the last block IP address: 192.168.33.20
-20      IN      PTR     mail.atadomain.io.
+20      IN      PTR     mail.anpavlovsk.com.
 ````
 
 Save the changes and close the file. 
@@ -233,11 +233,11 @@ Save the changes and close the file.
 # Checking the main configuration for BIND
 sudo named-checkconf
 
-# Checking forward zone forward.atadomain.io
-sudo named-checkzone atadomain.io /etc/bind/zones/forward.atadomain.io
+# Checking forward zone forward.anpavlovsk.com
+sudo named-checkzone anpavlovsk.com /etc/bind/zones/forward.anpavlovsk.com
 
-# Checking reverse zone reverse.atadomain.io
-sudo named-checkzone atadomain.io /etc/bind/zones/reverse.atadomain.io
+# Checking reverse zone reverse.anpavlovsk.com
+sudo named-checkzone anpavlovsk.com /etc/bind/zones/reverse.anpavlovsk.com
 ````
 When your configuration is correct, you’ll see an output similar below. 
 
@@ -264,51 +264,51 @@ Dig is a command-line utility for troubleshooting DNS Server installation. dig p
 
 To verify your BIND DNS server installation: 
 
-1. Run each dig command below to verify the sub-domains www.atadomain.io, mail.atadomain.io, and vault.atadomain.io.
+1. Run each dig command below to verify the sub-domains www.anpavlovsk.com, mail.anpavlovsk.com, and vault.anpavlovsk.com.
 
-If your DNS Server installation is successful, each sub-domain will be resolved to the correct IP address based on the forward.atadomain.io configuration.
+If your DNS Server installation is successful, each sub-domain will be resolved to the correct IP address based on the forward.anpavlovsk.com configuration.
 ````
 # Checking the domain names
-dig @192.168.33.10 www.atadomain.io
-dig @192.168.33.10 mail.atadomain.io
-dig @192.168.33.10 vault.atadomain.io
+dig @192.168.33.10 www.anpavlovsk.com
+dig @192.168.33.10 mail.anpavlovsk.com
+dig @192.168.33.10 vault.anpavlovsk.com
 ````
 
-Below is the output of the sub-domain www.atadomain.io resolved to the server IP address 192.168.33.10. 
+Below is the output of the sub-domain www.anpavlovsk.com resolved to the server IP address 192.168.33.10. 
 
 Paste ouput
 
-Below is the sub-domain mail.atadomain.io resolved to the server IP address 192.168.33.20. 
+Below is the sub-domain mail.anpavlovsk.com resolved to the server IP address 192.168.33.20. 
 
 Paste output
 
-And below is the sub-domain vault.atadomain.io resolved to the server IP address 192.168.33.50. 
+And below is the sub-domain vault.anpavlovsk.com resolved to the server IP address 192.168.33.50. 
 
 Paste output
 
-2. Next, run the dig command below to verify the MX record for the atadomain.io domain. 
+2. Next, run the dig command below to verify the MX record for the anpavlovsk.com domain. 
 ````
-dig @192.168.33.10 atadomain.io MX
+dig @192.168.33.10 anpavlovsk.com MX
 ````
 
-You should see the atadomain.io domain has the MX record mail.atadomain.io. 
+You should see the anpavlovsk.com domain has the MX record mail.anpavlovsk.com. 
 
 Paste output
 
 3. Lastly, run the following commands to verify the PTR record or reverse zone for the server IP addresses 192.168.33.10 and 192.168.33.20. 
 
-If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.atadomain.io configuration.  
+If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.anpavlovsk.com configuration.  
 ````
 # checking PTR record or reverse DNS
 dig @192.168.33.10 -x 192.168.33.10
 dig @192.168.33.10 -x 192.168.33.20
 ````
 
-You can see below, the server IP address 192.168.33.10 is resolved to the domain name ns1.atadomain.io. 
+You can see below, the server IP address 192.168.33.10 is resolved to the domain name ns1.anpavlovsk.com. 
 
 Paste output
 
-As you see below, the server IP address 192.168.33.20 is resolved to the domain name mail.atadomain.io.
+As you see below, the server IP address 192.168.33.20 is resolved to the domain name mail.anpavlovsk.com.
 
 Paste output
 
