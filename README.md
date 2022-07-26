@@ -32,6 +32,19 @@ The bind9-utils and bind9-dnsutils packages provide additional command-line tool
 sudo apt install bind9 bind9-utils bind9-dnsutils -y
 ````
 
+4. Lastly, run the systemctl command below to verify the BIND service. 
+
+The BIND package comes with the service named and is automatically started and enabled during the BIND package installation. 
+````
+# Check if named service enabled
+sudo systemctl is-enabled named
+
+# Check named service status
+sudo systemctl status named
+````
+
+Now you should see the BIND named service is enabled with the status as active (running). At this point, the BIND service will run automatically at system startup/boot. 
+
 
 
 Bind 9 service is managed by systemd. We can start the Bind DNS service and enable it to start at system reboot using the following command:
