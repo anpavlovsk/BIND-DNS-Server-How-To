@@ -1,9 +1,5 @@
 # BIND DNS Server How To
 
-## What is DNS
-
-![DNS](https://github.com/okorsi/Bind-DNS-how-To/blob/main/screenshots/what-is-dns-server.png?raw=true)
-
 ### Prerequisites
 
 In this tutorial, you’ll learn how to install and configure a secure BIND DNS Server and verify that sub-domains are resolved to the correct IP address.
@@ -240,8 +236,16 @@ sudo named-checkzone anpavlovsk.com /etc/bind/zones/forward.anpavlovsk.com
 sudo named-checkzone anpavlovsk.com /etc/bind/zones/reverse.anpavlovsk.com
 ````
 When your configuration is correct, you’ll see an output similar below. 
-
-Paste output
+````
+root@ubuntu2004:/# sudo named-checkconf
+root@ubuntu2004:/# sudo named-checkzone anpavlovsk.com /etc/bind/zones/forward.anpavlovsk.com
+zone anpavlovsk.com/IN: loaded serial 2
+OK
+root@ubuntu2004:/# sudo named-checkzone anpavlovsk.com /etc/bind/zones/reverse.anpavlovsk.com
+zone anpavlovsk.com/IN: loaded serial 1
+OK
+root@ubuntu2004:/#
+````
 
 7. Lastly, run the systemctl command below to restart and verify the named service. Doing so applies new changes to the named service. 
 ````
@@ -253,8 +257,32 @@ sudo systemctl status named
 ````
 
 Below, you can see the named service status is active (running). 
+````
+root@ubuntu2004:/# sudo systemctl restart named
+root@ubuntu2004:/# sudo systemctl status named
+● named.service - BIND Domain Name Server
+     Loaded: loaded (/lib/systemd/system/named.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2022-07-26 20:16:50 UTC; 10s ago
+       Docs: man:named(8)
+   Main PID: 9205 (named)
+      Tasks: 8 (limit: 2273)
+     Memory: 16.3M
+     CGroup: /system.slice/named.service
+             └─9205 /usr/sbin/named -f -4 -u bind
 
-Paste output
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: zone anpavlovsk.com/IN: loaded serial 2
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: zone localhost/IN: loaded serial 2
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: zone 127.in-addr.arpa/IN: loaded serial 1
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: zone 255.in-addr.arpa/IN: loaded serial 1
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: all zones loaded
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: running
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: zone 33.168.192.in-addr.arpa/IN: sending notifies (serial 1)
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: zone anpavlovsk.com/IN: sending notifies (serial 2)
+Jul 26 20:16:50 ubuntu2004.localdomain named[9205]: managed-keys-zone: Key 20326 for zone . is now trusted (acceptance timer complete)
+Jul 26 20:16:51 ubuntu2004.localdomain named[9205]: resolver priming query complete
+root@ubuntu2004:/#
+````
+
 
 ### Verifying BIND DNS Server Installation 
 
@@ -275,16 +303,89 @@ dig @192.168.33.10 vault.anpavlovsk.com
 ````
 
 Below is the output of the sub-domain www.anpavlovsk.com resolved to the server IP address 192.168.33.10. 
+````
+root@ubuntu2004:/# dig @192.168.33.10 www.anpavlovsk.com
 
-Paste ouput
+; <<>> DiG 9.16.1-Ubuntu <<>> @192.168.33.10 www.anpavlovsk.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 43374
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: 534d9bb47036240f0100000062e04c66ecaaddcae9e626b8 (good)
+;; QUESTION SECTION:
+;www.anpavlovsk.com.            IN      A
+
+;; ANSWER SECTION:
+www.anpavlovsk.com.     604800  IN      A       192.168.33.10
+
+;; Query time: 0 msec
+;; SERVER: 192.168.33.10#53(192.168.33.10)
+;; WHEN: Tue Jul 26 20:19:50 UTC 2022
+;; MSG SIZE  rcvd: 91
+
+root@ubuntu2004:/#
+
+````
 
 Below is the sub-domain mail.anpavlovsk.com resolved to the server IP address 192.168.33.20. 
+````
+root@ubuntu2004:/# dig @192.168.33.10 mail.anpavlovsk.com
 
-Paste output
+; <<>> DiG 9.16.1-Ubuntu <<>> @192.168.33.10 mail.anpavlovsk.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 35886
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: 8f76a081218212eb0100000062e04c98756766ab98ec9dfd (good)
+;; QUESTION SECTION:
+;mail.anpavlovsk.com.           IN      A
+
+;; ANSWER SECTION:
+mail.anpavlovsk.com.    604800  IN      A       192.168.33.20
+
+;; Query time: 0 msec
+;; SERVER: 192.168.33.10#53(192.168.33.10)
+;; WHEN: Tue Jul 26 20:20:40 UTC 2022
+;; MSG SIZE  rcvd: 92
+
+root@ubuntu2004:/#
+````
 
 And below is the sub-domain vault.anpavlovsk.com resolved to the server IP address 192.168.33.50. 
+````
+root@ubuntu2004:/# dig @192.168.33.10 vault.anpavlovsk.com
 
-Paste output
+; <<>> DiG 9.16.1-Ubuntu <<>> @192.168.33.10 vault.anpavlovsk.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 44512
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: c2915c11e3c5ce360100000062e04cbd4d0b9e9d28349e88 (good)
+;; QUESTION SECTION:
+;vault.anpavlovsk.com.          IN      A
+
+;; ANSWER SECTION:
+vault.anpavlovsk.com.   604800  IN      A       192.168.33.50
+
+;; Query time: 0 msec
+;; SERVER: 192.168.33.10#53(192.168.33.10)
+;; WHEN: Tue Jul 26 20:21:17 UTC 2022
+;; MSG SIZE  rcvd: 93
+
+root@ubuntu2004:/#
+````
 
 2. Next, run the dig command below to verify the MX record for the anpavlovsk.com domain. 
 ````
@@ -292,8 +393,35 @@ dig @192.168.33.10 anpavlovsk.com MX
 ````
 
 You should see the anpavlovsk.com domain has the MX record mail.anpavlovsk.com. 
+````
+root@ubuntu2004:/# dig @192.168.33.10 anpavlovsk.com MX
 
-Paste output
+; <<>> DiG 9.16.1-Ubuntu <<>> @192.168.33.10 anpavlovsk.com MX
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 26309
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 2
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: 50490bd4ad1215a40100000062e04d07a427e9958b76f5d9 (good)
+;; QUESTION SECTION:
+;anpavlovsk.com.                        IN      MX
+
+;; ANSWER SECTION:
+anpavlovsk.com.         604800  IN      MX      10 mail.anpavlovsk.com.
+
+;; ADDITIONAL SECTION:
+mail.anpavlovsk.com.    604800  IN      A       192.168.33.20
+
+;; Query time: 0 msec
+;; SERVER: 192.168.33.10#53(192.168.33.10)
+;; WHEN: Tue Jul 26 20:22:31 UTC 2022
+;; MSG SIZE  rcvd: 108
+
+root@ubuntu2004:/#
+````
 
 3. Lastly, run the following commands to verify the PTR record or reverse zone for the server IP addresses 192.168.33.10 and 192.168.33.20. 
 
@@ -305,12 +433,61 @@ dig @192.168.33.10 -x 192.168.33.20
 ````
 
 You can see below, the server IP address 192.168.33.10 is resolved to the domain name ns1.anpavlovsk.com. 
+````
+root@ubuntu2004:/# dig @192.168.33.10 -x 192.168.33.10
 
-Paste output
+; <<>> DiG 9.16.1-Ubuntu <<>> @192.168.33.10 -x 192.168.33.10
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 53840
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: bd79e65d36512aef0100000062e04d40c3cec55af10672d5 (good)
+;; QUESTION SECTION:
+;10.33.168.192.in-addr.arpa.    IN      PTR
+
+;; ANSWER SECTION:
+10.33.168.192.in-addr.arpa. 604800 IN   PTR     ns1.anpavlovsk.com.
+
+;; Query time: 0 msec
+;; SERVER: 192.168.33.10#53(192.168.33.10)
+;; WHEN: Tue Jul 26 20:23:28 UTC 2022
+;; MSG SIZE  rcvd: 115
+
+root@ubuntu2004:/#
+````
 
 As you see below, the server IP address 192.168.33.20 is resolved to the domain name mail.anpavlovsk.com.
+````
+root@ubuntu2004:/# dig @192.168.33.10 -x 192.168.33.20
 
-Paste output
+; <<>> DiG 9.16.1-Ubuntu <<>> @192.168.33.10 -x 192.168.33.20
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 40772
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: ae0ba41f30d486ff0100000062e04d60552e4257405aedd8 (good)
+;; QUESTION SECTION:
+;20.33.168.192.in-addr.arpa.    IN      PTR
+
+;; ANSWER SECTION:
+20.33.168.192.in-addr.arpa. 604800 IN   PTR     mail.anpavlovsk.com.
+
+;; Query time: 0 msec
+;; SERVER: 192.168.33.10#53(192.168.33.10)
+;; WHEN: Tue Jul 26 20:24:00 UTC 2022
+;; MSG SIZE  rcvd: 116
+
+root@ubuntu2004:/#
+````
+
 
 ###Conclusion 
 
