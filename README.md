@@ -1,4 +1,4 @@
-# BIND DNS Server
+# BIND DNS Server How To
 
 ## What is DNS
 
@@ -6,11 +6,13 @@
 
 ### Prerequisites
 
+In this tutorial, you’ll learn how to install and configure a secure BIND DNS Server and verify that sub-domains are resolved to the correct IP address.
+
 This tutorial will be a hands-on demonstration. To follow along, ensure you have the following:
 
 * A Linux server – This example uses the Ubuntu 20.04 server. 
 * A non-root user with root privileges or root/administrator user. 
-* A domain name pointed to the server IP address – This demo uses the atadomain.io domain and server IP address 172.16.1.10. 
+* A domain name pointed to the server IP address – This demo uses the atadomain.io domain and server IP address 192.168.33.10. 
 
 ### Installing BIND Packages
 
@@ -60,10 +62,10 @@ Save the changes you made and close the file.
 
 2. Next, edit the /etc/bind/named.conf.options file and populate the following configuration below the directory "/var/cache/bind"; line. 
 
-This configuration sets the BIND service to run on default UDP port 53 on the server’s localhost and public IP address (172.16.1.10). At the same time, it allows queries from any host to the BIND DNS server using the Cloudflare DNS 1.1.1.1 as the forwarder. 
+This configuration sets the BIND service to run on default UDP port 53 on the server’s localhost and public IP address (192.168.33.10). At the same time, it allows queries from any host to the BIND DNS server using the Cloudflare DNS 1.1.1.1 as the forwarder. 
 ````
     // listen port and address
-    listen-on port 53 { localhost; 172.16.1.10; };
+    listen-on port 53 { localhost; 192.168.33.10; };
 
     // for public DNS server - allow from any
     allow-query { any; };
@@ -99,7 +101,7 @@ zone "atadomain.io" {
     file "/etc/bind/zones/forward.atadomain.io";
 };
 
-zone "1.16.172.in-addr.arpa" {
+zone "33.168.192.in-addr.arpa" {
     type master;
     file "/etc/bind/zones/reverse.atadomain.io";
 };
@@ -130,7 +132,7 @@ The forward zone configuration is where you define your domain name and the serv
 
 The configuration below creates the following name server and sub-domains: 
 
-* ns1.atadomain.io – The main Name Server for your domain with the IP address 172.16.1.10. 
+* ns1.atadomain.io – The main Name Server for your domain with the IP address 192.168.33.10. 
 * MX record for the atadomain.io domain that is handled by the mail.atadomain.io. The MX record is used for the mail server. 
 * Sub-domains for applications: www.atadomain.io, mail.atadomain.io, and vault.atadomain.io. 
 ````
@@ -150,7 +152,7 @@ $TTL    604800
 
 ; Resolve ns1 to server IP address
 ; A record for the main DNS
-ns1     IN      A       172.16.1.10
+ns1     IN      A       192.168.33.10
 
 
 ; Define MX record for mail
@@ -159,9 +161,9 @@ atadomain.io. IN   MX   10   mail.atadomain.io.
 
 ; Other domains for atadomain.io
 ; Create subdomain www - mail - vault
-www     IN      A       172.16.1.10
-mail    IN      A       172.16.1.20
-vault   IN      A       172.16.1.50
+www     IN      A       192.168.33.10
+mail    IN      A       192.168.33.20
+vault   IN      A       192.168.33.50
 ````
 
 Save the changes and close the file. 
@@ -174,8 +176,8 @@ The PTR record uses the last block of the IP address, like the PTR record with t
 
 This configuration creates the reverse zone or PTR record for the following domains: 
 
-* Name server ns1.atadomain.io with the reverse zone or PTR record 172.16.1.10. 
-* PTR record for the domain mail.atadomain.io to the server IP address 172.16.1.20. 
+* Name server ns1.atadomain.io with the reverse zone or PTR record 192.168.33.10. 
+* PTR record for the domain mail.atadomain.io to the server IP address 192.168.33.10. 
 ````
 ;
 ; BIND reverse data file for the local loopback interface
@@ -190,16 +192,16 @@ $TTL    604800
 
 ; Name Server Info for ns1.atadomain.io
 @       IN      NS      ns1.atadomain.io.
-NS1     IN      A       172.168.1.10
+NS1     IN      A       192.168.33.10
 
 
 ; Reverse DNS or PTR Record for ns1.atadomain.io
-; Using the last number of DNS Server IP address: 172.16.1.10
+; Using the last number of DNS Server IP address: 192.168.33.10
 10      IN      PTR     ns1.atadomain.io.
 
 
 ; Reverse DNS or PTR Record for mail.atadomain.io
-; Using the last block IP address: 172.16.1.20
+; Using the last block IP address: 192.168.33.20
 20      IN      PTR     mail.atadomain.io.
 ````
 
@@ -246,48 +248,46 @@ To verify your BIND DNS server installation:
 If your DNS Server installation is successful, each sub-domain will be resolved to the correct IP address based on the forward.atadomain.io configuration.
 ````
 # Checking the domain names
-dig @172.16.1.10 www.atadomain.io
-dig @172.16.1.10 mail.atadomain.io
-dig @172.16.1.10 vault.atadomain.io
+dig @192.168.33.10 www.atadomain.io
+dig @192.168.33.10 mail.atadomain.io
+dig @192.168.33.10 vault.atadomain.io
 ````
 
-Below is the output of the sub-domain www.atadomain.io resolved to the server IP address 172.16.1.10. 
+Below is the output of the sub-domain www.atadomain.io resolved to the server IP address 192.168.33.10. 
 
 Paste ouput
 
-Below is the sub-domain mail.atadomain.io resolved to the server IP address 172.16.1.20. 
+Below is the sub-domain mail.atadomain.io resolved to the server IP address 192.168.33.20. 
 
 Paste output
 
-And below is the sub-domain vault.atadomain.io resolved to the server IP address 172.16.1.50. 
+And below is the sub-domain vault.atadomain.io resolved to the server IP address 192.168.33.50. 
 
 Paste output
 
 2. Next, run the dig command below to verify the MX record for the atadomain.io domain. 
 ````
-dig @172.16.1.10 atadomain.io MX
+dig @192.168.33.10 atadomain.io MX
 ````
 
 You should see the atadomain.io domain has the MX record mail.atadomain.io. 
 
 Paste output
 
-3. Lastly, run the following commands to verify the PTR record or reverse zone for the server IP addresses 172.16.1.10 and 172.16.1.20. 
+3. Lastly, run the following commands to verify the PTR record or reverse zone for the server IP addresses 192.168.33.10 and 192.168.33.20. 
 
 If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.atadomain.io configuration.  
 ````
 # checking PTR record or reverse DNS
-dig @172.16.1.10 -x 172.16.1.10
-dig @172.16.1.10 -x 172.16.1.20
+dig @192.168.33.10 -x 192.168.33.10
+dig @192.168.33.10 -x 192.168.33.20
 ````
 
-You can see below, the server IP address 172.16.1.10 is resolved to the domain name ns1.atadomain.io. 
+You can see below, the server IP address 192.168.33.10 is resolved to the domain name ns1.atadomain.io. 
 
 Paste output
 
-As you see below, the server IP address 172.16.1.20 is resolved to the domain name mail.atadomain.io.
-
-As you see below, the server IP address 172.16.1.20 is resolved to the domain name mail.atadomain.io.
+As you see below, the server IP address 192.168.33.20 is resolved to the domain name mail.atadomain.io.
 
 Paste output
 
