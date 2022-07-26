@@ -274,9 +274,9 @@ Paste output
 
 3. Lastly, run the following commands to verify the PTR record or reverse zone for the server IP addresses 172.16.1.10 and 172.16.1.20. 
 
-If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.atadomain.io configuration. 
+If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.atadomain.io configuration.  
 ````
-# checking PTR record or reverse DNS
+checking PTR record or reverse DNS
 dig @172.16.1.10 -x 172.16.1.10
 dig @172.16.1.10 -x 172.16.1.20
 ````
