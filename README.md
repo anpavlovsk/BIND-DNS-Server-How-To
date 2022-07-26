@@ -249,7 +249,7 @@ If your DNS Server installation is successful, each sub-domain will be resolved 
 dig @172.16.1.10 www.atadomain.io
 dig @172.16.1.10 mail.atadomain.io
 dig @172.16.1.10 vault.atadomain.io
-```
+````
 
 Below is the output of the sub-domain www.atadomain.io resolved to the server IP address 172.16.1.10. 
 
@@ -276,7 +276,7 @@ Paste output
 
 If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.atadomain.io configuration.  
 ````
-checking PTR record or reverse DNS
+# checking PTR record or reverse DNS
 dig @172.16.1.10 -x 172.16.1.10
 dig @172.16.1.10 -x 172.16.1.20
 ````
