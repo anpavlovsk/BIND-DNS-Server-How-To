@@ -84,6 +84,157 @@ sudo named-checkconf
 
 If there’s no output, the BIND configurations are correct without any error. 
 
+### Setting Up DNS Zones 
+
+At this point, you’ve configured the basic configuration of the BIND DNS Server. You’re ready to create a DNS Server with your domain and add other sub-domains for your applications. You’ll need to define and create a new DNS zones configuration to do so. 
+
+In this tutorial, you’ll create a new Name Server (ns1.atadomain.io) and sub-domains (www.atadomain.io, mail.atadomain.io, vault.atadomain.io). 
+
+1. Edit the /etc/bind/named.conf.local file using your preferred editor and add the following configuration. 
+
+This configuration defines the forward zone (/etc/bind/zones/forward.atadomain.io), and the reverse zone (/etc/bind/zones/reverse.atadomain.io) for the atadomain.io domain name. 
+```
+zone "atadomain.io" {
+    type master;
+    file "/etc/bind/zones/forward.atadomain.io";
+};
+
+zone "1.16.172.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/reverse.atadomain.io";
+};
+````
+
+Save the changes and close the file. 
+
+2. Next, run the below command to create a new directory (/etc/bind/zones) for string DNS zones configurations. 
+````
+mkdir -p /etc/bind/zones/
+````
+
+3. Run each command below to copy the default forward and reverse zones configuration to the /etc/bind/zones directory. 
+```
+# Copy default forward zone
+sudo cp /etc/bind/db.local /etc/bind/zones/forward.atadomain.io
+
+# Copy default reverse zone
+sudo cp /etc/bind/db.127 /etc/bind/zones/reverse.atadomain.io
+
+# List contents of the /etc/bind/zones/ directory
+ls /etc/bind/zones/
+````
+
+4. Now, edit the forward zone configuration (/etc/bind/zones/forward.atadomain.io) using your preferred editor and populate the configuration below. 
+
+The forward zone configuration is where you define your domain name and the server IP address. This configuration will translate the domain name to the correct IP address of the server. 
+
+The configuration below creates the following name server and sub-domains: 
+
+* ns1.atadomain.io – The main Name Server for your domain with the IP address 172.16.1.10. 
+* MX record for the atadomain.io domain that is handled by the mail.atadomain.io. The MX record is used for the mail server. 
+* Sub-domains for applications: www.atadomain.io, mail.atadomain.io, and vault.atadomain.io. 
+````
+;
+; BIND data file for the local loopback interface
+;
+$TTL    604800
+@       IN      SOA     atadomain.io. root.atadomain.io. (
+                            2         ; Serial
+                        604800         ; Refresh
+                        86400         ; Retry
+                        2419200         ; Expire
+                        604800 )       ; Negative Cache TTL
+
+; Define the default name server to ns1.atadomain.io
+@       IN      NS      ns1.atadomain.io.
+
+; Resolve ns1 to server IP address
+; A record for the main DNS
+ns1     IN      A       172.16.1.10
+
+
+; Define MX record for mail
+atadomain.io. IN   MX   10   mail.atadomain.io.
+
+
+; Other domains for atadomain.io
+; Create subdomain www - mail - vault
+www     IN      A       172.16.1.10
+mail    IN      A       172.16.1.20
+vault   IN      A       172.16.1.50
+````
+
+Save the changes and close the file. 
+
+5. Like the forward zone, edit the reverse zone configuration file (/etc/bind/zones/reverse.atadomain.io) and populate the following configuration. 
+
+The reverse zone translates the server IP address to the domain name. The reverse zone or PTR record is essential for services like the Mail server, which affects the Mail server’s reputation. 
+
+The PTR record uses the last block of the IP address, like the PTR record with the number 10 for the server IP address 172.16.1.10. 
+
+This configuration creates the reverse zone or PTR record for the following domains: 
+
+* Name server ns1.atadomain.io with the reverse zone or PTR record 172.16.1.10. 
+* PTR record for the domain mail.atadomain.io to the server IP address 172.16.1.20. 
+````
+;
+; BIND reverse data file for the local loopback interface
+;
+$TTL    604800
+@       IN      SOA     atadomain.io. root.atadomain.io. (
+                            1         ; Serial
+                        604800         ; Refresh
+                        86400         ; Retry
+                        2419200         ; Expire
+                        604800 )       ; Negative Cache TTL
+
+; Name Server Info for ns1.atadomain.io
+@       IN      NS      ns1.atadomain.io.
+NS1     IN      A       172.168.1.10
+
+
+; Reverse DNS or PTR Record for ns1.atadomain.io
+; Using the last number of DNS Server IP address: 172.16.1.10
+10      IN      PTR     ns1.atadomain.io.
+
+
+; Reverse DNS or PTR Record for mail.atadomain.io
+; Using the last block IP address: 172.16.1.20
+20      IN      PTR     mail.atadomain.io.
+````
+
+Save the changes and close the file. 
+
+6. Now, run the following commands to check and verify BIND configurations.
+````
+# Checking the main configuration for BIND
+sudo named-checkconf
+
+# Checking forward zone forward.atadomain.io
+sudo named-checkzone atadomain.io /etc/bind/zones/forward.atadomain.io
+
+# Checking reverse zone reverse.atadomain.io
+sudo named-checkzone atadomain.io /etc/bind/zones/reverse.atadomain.io
+````
+When your configuration is correct, you’ll see an output similar below. 
+
+Paste output
+
+7. Lastly, run the systemctl command below to restart and verify the named service. Doing so applies new changes to the named service. 
+````
+# Restart named service
+sudo systemctl restart named
+
+# Verify named service
+sudo systemctl status named
+````
+
+Below, you can see the named service status is active (running). 
+
+Paste output
+
+
+
 
 
 
