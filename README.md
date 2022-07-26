@@ -233,240 +233,65 @@ Below, you can see the named service status is active (running).
 
 Paste output
 
+### Verifying BIND DNS Server Installation 
 
+You’ve now completed the BIND DNS installation. But how do you verify your DNS Server installation? The dig command will do the trick. 
 
+Dig is a command-line utility for troubleshooting DNS Server installation. dig performs DNS lookup for the given domain name and displays detailed answers for the domain name target. On the Ubuntu system, dig is part of the bind9-dnsutil package. 
 
+To verify your BIND DNS server installation: 
 
+1. Run each dig command below to verify the sub-domains www.atadomain.io, mail.atadomain.io, and vault.atadomain.io.
 
-Bind 9 service is managed by systemd. We can start the Bind DNS service and enable it to start at system reboot using the following command:
+If your DNS Server installation is successful, each sub-domain will be resolved to the correct IP address based on the forward.atadomain.io configuration.
 ````
-systemctl start named
-systemctl enable named
-````
-check the status of the Bind service
-````
-systemctl status named
-````
-we get the following result:
-````
-● named.service - BIND Domain Name Server
-     Loaded: loaded (/lib/systemd/system/named.service; enabled; vendor preset: enabled)
-     Active: active (running) since Tue 2022-05-26 21:38:44 UTC; 1min 14s ago
-       Docs: man:named(8)
-   Main PID: 90096 (named)
-      Tasks: 6 (limit: 2188)
-     Memory: 7.5M
-        CPU: 316ms
-     CGroup: /system.slice/named.service
-             └─90096 /usr/sbin/named -u bind
-
-Jul 19 21:38:44 ubuntus named[90096]: network unreachable resolving './DNSKEY/IN': 2001:500:2f::f#53
-Jul 19 21:38:44 ubuntus named[90096]: network unreachable resolving './NS/IN': 2001:500:2f::f#53
-Jul 19 21:38:44 ubuntus named[90096]: network unreachable resolving './DNSKEY/IN': 2001:500:a8::e#53
-Jul 19 21:38:44 ubuntus named[90096]: network unreachable resolving './NS/IN': 2001:500:a8::e#53
-Jul 19 21:38:44 ubuntus named[90096]: network unreachable resolving './DNSKEY/IN': 2001:500:1::53#53
-Jul 19 21:38:44 ubuntus named[90096]: network unreachable resolving './NS/IN': 2001:500:1::53#53
-````
-Bind DNS server’s configuration files are located inside /etc/bind directory
-````
-root@ubuntus:/home/oleksii# ls /etc/bind
-bind.keys  db.127  db.empty  named.conf                named.conf.local    rndc.key
-db.0       db.255  db.local  named.conf.default-zones  named.conf.options  zones.rfc1918
-root@ubuntus:/home/oleksii#
-````
-Need to edit /etc/bind/named.conf.options file and add forwarders. DNS query will be forwarded to the forwarders when your local DNS server is unable to resolve the query
-Uncomment and change the following lines:
-````
-forwarders {
-       8.8.8.8;
-};
-````
-Edit the /etc/bind/named.conf.local file to define the zone for our domain.
-````
-zone "okorsi.com" {
- type master;
- file "/etc/bind/db.local";
-};
-zone "0.16.172.in-addr.arpa" {
- type master;
- file "/etc/bind/db.172";
-};
-````
-A brief explanation of above file is shown below:
-
-* okorsi.com is our forward zone.
-* 0.16.172.in-addr.arpa is our reverse zone.
-* db.local is the name of the forward lookup zone file.
-* db.172 is the name of the reverse lookup zone file.
-
-Then, verify the configuration file for any error using the following command:
-````
-named-checkconf
-````
-if we have not received any information - then everything is fine
-
-## Configure Forward and Reverse Lookup Zone
-
-![DNS](https://github.com/okorsi/Bind-DNS-how-To/blob/main/screenshots/forward-and-reverse-zones.png?raw=true)
-
-Edit the forward lookup zone file:
-````
-nano /etc/bind/db.local
-````
-Make the following changes:
-````
-$TTL    604800
-@       IN      SOA     ubuntus.okorsi.com. root.ubuntus.okorsi.com. (
-                              2         ; Serial
-                         604800         ; Refresh
-                          86400         ; Retry
-                        2419200         ; Expire
-                         604800 )       ; Negative Cache TTL
-@          IN      NS      ubuntus.okorsi.com.
-ubuntus    IN      A       172.16.0.10
-web1       IN      A       172.16.0.20
-web2       IN      A       172.16.0.30
-@          IN      AAAA    ::1
-````
-Where:
-
-* 172.16.0.10: IP address of DNS server.
-* 172.16.0.20: IP address of WEB1 server.
-* 172.16.0.20: IP address of WEB2 server.
-* NS: Name server record.
-* A: Address record.
-* SOA: Start of authority record.
-
-Edit the reverse lookup zone file:
-````
-nano /etc/bind/db.172
-````
-Make the following changes:
-````
-$TTL    604800
-@       IN      SOA     ubuntus.okorsi.com. root.ubuntus.okorsi.com. (
-                              1
-                         604800
-                          86400
-                        2419200
-                         604800 )
-@       IN      NS      ubuntus.okorsi.com.
-ubuntus    IN      A       172.16.0.10
-web1       IN      A       172.16.0.20
-web2       IN      A       172.16.0.30
-10       IN      PTR     ubuntus.okorsi.com.
-````
-Edit the /etc/resolv.conf file and define our DNS server:
-````
-nano /etc/resolv.conf
-````
-Add the following lines:
-````
-search okorsi.com
-nameserver 172.16.0.10
-````
-restart the Bind DNS service to apply the changes:
+# Checking the domain names
+dig @172.16.1.10 www.atadomain.io
+dig @172.16.1.10 mail.atadomain.io
+dig @172.16.1.10 vault.atadomain.io
 ```
-systemctl restart named
+
+Below is the output of the sub-domain www.atadomain.io resolved to the server IP address 172.16.1.10. 
+
+Paste ouput
+
+Below is the sub-domain mail.atadomain.io resolved to the server IP address 172.16.1.20. 
+
+Paste output
+
+And below is the sub-domain vault.atadomain.io resolved to the server IP address 172.16.1.50. 
+
+Paste output
+
+2. Next, run the dig command below to verify the MX record for the atadomain.io domain. 
 ````
-Next, check the forward and reverse lookup zone file for any syntax error with the following command:
-````
-named-checkzone forward.okorsi db.local
-````
-If everything is fine. We should see the following output:
-````
-zone forward.okorsi/IN: loaded serial 4
-OK
-`````
-To check the reverse lookup zone file, run the following command:
-````
-named-checkzone reverse.okorsi db.172
-````
-If everything is fine. We should see the following output:
-````
-If everything is fine. You should see the following output:
+dig @172.16.1.10 atadomain.io MX
 ````
 
-## Verify Bind DNS Server
+You should see the atadomain.io domain has the MX record mail.atadomain.io. 
 
-First, run the dig command against our DNS nameserver:
-````
-dig ubuntus.okorsi.com
-````
-We should see the following output:
-````
-; <<>> DiG 9.16.1-Ubuntu <<>> ubuntus.okorsi.com
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 29810
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+Paste output
 
-;; OPT PSEUDOSECTION:
-; EDNS: version: 0, flags:; udp: 4096
-; COOKIE: a5919d692166f92001000000627498b926c5a27d5f9c28a1 (good)
-;; QUESTION SECTION:
-;ubuntus.okorsi.com.	IN	A
+3. Lastly, run the following commands to verify the PTR record or reverse zone for the server IP addresses 172.16.1.10 and 172.16.1.20. 
 
-;; ANSWER SECTION:
-ubuntus.okorsi.com. 604800	IN	A	172.16.0.10
-web1.okorsi.com. 604800 IN A 172.16.0.20
-web2.okorsi.com. 604800 IN A 172.16.0.30
-
-;; Query time: 0 msec
-;; SERVER: 172.16.0.10#53(172.16.0.10)
-;; WHEN: Tue May 26 03:40:41 UTC 2022
-;; MSG SIZE  rcvd: 96
+If your BIND installation is successful, each IP address will be resolved to the domain name defined on the reverse.atadomain.io configuration. 
 ````
-Now, run the dig command against the DNS server’s IP to perform the reverse lookup query as shown below:
-````
-dig -x 172.16.0.10
-````
-We will get the following output:
-````
-; <<>> DiG 9.16.1-Ubuntu <<>> -x 172.16.0.10
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 55197
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-
-;; OPT PSEUDOSECTION:
-; EDNS: version: 0, flags:; udp: 4096
-; COOKIE: 14afadf1d320160e01000000627498d32b3036329829ce2f (good)
-;; QUESTION SECTION:
-;10.0.16.172.in-addr.arpa.	IN	PTR
-
-;; ANSWER SECTION:
-10.0.16.172.in-addr.arpa. 604800 IN	PTR	ubuntus.okorsi.com.
-
-;; Query time: 0 msec
-;; SERVER: 172.16.0.10#53(172.16.0.10)
-;; WHEN: Tue May 26 03:41:07 UTC 2022
-;; MSG SIZE  rcvd: 118
-````
-We can also use nslookup command against the DNS server to confirm DNS server name resolution.
-````
-nslookup ubuntus.okorsi.com
-````
-We should see name to IP resolution in the following output:
-````
-Server:		172.16.0.10
-Address:	172.16.0.10#53
-
-Name:	ubuntus.okorsi.com
-Address: 172.16.0.10
-````
-Now, run the nslookup command against DNS server IP address to confirm the reverse lookup:
-````
-nslookup 172.16.0.10
-````
-We should see the IP address to name resolution in the following output:
-````
-10.0.16.172.in-addr.arpa	name = ubuntus.okorsi.com.
+# checking PTR record or reverse DNS
+dig @172.16.1.10 -x 172.16.1.10
+dig @172.16.1.10 -x 172.16.1.20
 ````
 
+You can see below, the server IP address 172.16.1.10 is resolved to the domain name ns1.atadomain.io. 
 
+Paste output
 
+As you see below, the server IP address 172.16.1.20 is resolved to the domain name mail.atadomain.io.
 
+As you see below, the server IP address 172.16.1.20 is resolved to the domain name mail.atadomain.io.
 
+Paste output
 
+###Conclusion 
+
+Throughout this tutorial, you’ve learned how to create and set up a secure BIND DNS server on your Ubuntu server. You’ve also created the forward and reverse zone for adding your domain and verified DNS servers by running dig commands.
 
