@@ -12,11 +12,18 @@ This tutorial will be a hands-on demonstration. To follow along, ensure you have
 * A non-root user with root privileges or root/administrator user. 
 * A domain name pointed to the server IP address – This demo uses the atadomain.io domain and server IP address 172.16.1.10. 
 
-### Install Bind DNS Server
+### Installing BIND Packages
 
-First of all we need to install bind9 on our Ubuntu server:
+The default Ubuntu repository provides BIND packages but doesn’t come installed with your system. You can install BIND as the main DNS Server or authoritative only. BIND gives you powerful features, such as master-slave installation support, DNSSEC support, and built-in Access Control Lists (ACL).
+
+To get started with BIND DNS, you’ll first need to install the BIND packages on your machine with the apt package manager. 
+
+1. Open your terminal and log in to your server.
+
+2. Next, run the apt update command below to update and refresh the repository package index. This command ensures that you are installing the latest version of packages.
+
 ```
-apt-get install bind9 bind9utils bind9-dnsutils bind9-doc bind9-host -y
+sudo apt update
 ```
 Bind 9 service is managed by systemd. We can start the Bind DNS service and enable it to start at system reboot using the following command:
 ````
