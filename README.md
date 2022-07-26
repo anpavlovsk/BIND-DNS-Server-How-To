@@ -47,18 +47,19 @@ sudo systemctl status named
 
 Now you should see the BIND named service is enabled with the status as active (running). At this point, the BIND service will run automatically at system startup/boot. 
 ````
-root@ubuntu2004:/etc/bind/zones# sudo systemctl is-enabled named
+root@ubuntu2004:/# sudo systemctl is-enabled named
 enabled
-root@ubuntu2004:/etc/bind/zones# sudo systemctl status named
+root@ubuntu2004:/# sudo systemctl status named
 ● named.service - BIND Domain Name Server
      Loaded: loaded (/lib/systemd/system/named.service; enabled; vendor preset: enabled)
      Active: active (running) since Wed 2022-07-20 17:58:33 UTC; 5 days ago
        Docs: man:named(8)
    Main PID: 3745 (named)
       Tasks: 8 (limit: 2273)
-     Memory: 17.5M
+     Memory: 17.9M
      CGroup: /system.slice/named.service
              └─3745 /usr/sbin/named -f -4 -u bind
+
 ````
 
 
@@ -100,6 +101,11 @@ sudo named-checkconf
 ````
 
 If there’s no output, the BIND configurations are correct without any error. 
+````
+root@ubuntu2004:/# sudo named-checkconf
+root@ubuntu2004:/#
+root@ubuntu2004:/#
+````
 
 ### Setting Up DNS Zones 
 
